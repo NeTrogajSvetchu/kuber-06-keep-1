@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: 1-dep-vol
+  namespace: kub-6
+spec:
+  selector:
+    matchLabels:
+      app: dep-1
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: dep-1
+    spec:
+      containers:
+      - name: busybox
+        image: busybox:1.28
+        command: ['sh', '-c', 'mkdir -p /scp && while true; do echo "$(date) - Test message" >> /scp/success.txt; sleep 5; done']
+        volumeMounts:
+        - name: volume
+          mountPath: /scp
+      - name: multitool
+        image: wbitt/network-multitool
+        command: ['sh', '-c', 'tail -f /scp/success.txt']
+        volumeMounts:
+        - name: volume
+          mountPath: /scp
+      volumes:
+      - name: volume
+        emptyDir: {}
